@@ -11,6 +11,7 @@ namespace Backprop
 		private double bias;
 		private double error;
 		static System.Random rand;
+
 		public HNeuron()
 		{
 			idno=0;
@@ -21,6 +22,7 @@ namespace Backprop
 			weights=new double[10];
 			this.setRandomWeights(10);
 		}
+
 		public HNeuron(int idnodata,int size)
 		{
 			idno=idnodata;
@@ -31,6 +33,7 @@ namespace Backprop
 			weights=new double[wsize];
 			this.setRandomWeights(wsize);
 		}
+
 		public void calculateErr(double [] der)
 		{
 			// calculate the error on the input layer
@@ -43,6 +46,7 @@ namespace Backprop
 			//result*=(1-hactivation);
 			error=(result*hactivation*(1-hactivation));
 		}
+
 		public void setWeight(double lrpout,double [] der)
 		{
 			// change the weights of connected between input and 2 layer
@@ -53,51 +57,19 @@ namespace Backprop
 				weights[x]+=(temp*der[x]);
 			}
 		}
-		public void setWeight(int pos,double dat)
-		{
-			weights[pos]=dat;
-		}
-		public double getWeight(int outid)
-		{
-			return weights[outid];
-		}
-		public void setErr(double x)
-		{
-			error=x;
-		}
-		public double getErr()
-		{
-			return error;
-		}
-		public void setHactivation(double data)
-		{
-			this.hactivation=data;
-		}
-		public double getHactivation()
-		{
-			return hactivation;
-		}
-		public void setIdno(int x)
-		{
-			idno=x;
-		}
-		public int getIdno()
-		{
-			return idno;
-		}
-		public void setBias(double b)
-		{
-			bias=b;
-		}
-		public double getBias()
-		{
-			return bias;
-		}
-		public void changeBias(double lrpin)
-		{
-			//change the bias of this neuron
-			bias+=(error*lrpin);
-		}
+
+		public void setWeight(int pos,double dat) { weights[pos]=dat; }
+		public double getWeight(int outid) { return weights[outid]; }
+		public void setErr(double x) { error=x; }
+		public double getErr() { return error; }
+		public void setHactivation(double data) { this.hactivation=data; }
+		public double getHactivation() { return hactivation; }
+		public void setIdno(int x) { idno=x; }
+		public int getIdno() { return idno; }
+		public void setBias(double b) { bias=b; }
+		public double getBias() { return bias; }
+		public void changeBias(double lrpin) { bias+=(error*lrpin); }
+
 		public void setRandomWeights(int size)
 		{
 			for(int x=0;x<size;x++)
@@ -130,9 +102,5 @@ namespace Backprop
                 
 			return number; 
 		}
-	}//end of class HNeuron
-
-
-
-
+	}
 }

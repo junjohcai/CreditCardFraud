@@ -1,30 +1,16 @@
-// ============================================================
-//  CreditCardFraud - Real-World MLP Demo
-//  Dataset : creditcard.csv  (Kaggle Credit Card Fraud)
-//  Network  : 30 inputs -> hiddenSize hidden -> 1 output
-//  Task     : Binary Classification (0 = legit, 1 = fraud)
-// ============================================================
-
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using Backprop;
 
-// ── Hyperparameters ─────────────────────────────────────────
-// Tweak these to experiment and document your findings.
-const int    HIDDEN_SIZE   = 16;     // hidden neuron count
-const double TRAIN_RATIO   = 0.80;   // 80% train / 20% test
-const int    EPOCHS        = 500;    // total training epochs
-const int    LOG_INTERVAL  = 100;    // print loss every N epochs
-const double THRESHOLD     = 0.5;    // sigmoid output → binary
-// Stratified sample: take this many legit + ALL fraud rows.
-// Full dataset (284K rows) = ~2 min/epoch = impractical.
-// 5000 legit + all 492 fraud ≈ 5492 rows → runs in seconds/epoch.
-const int    LEGIT_SAMPLE  = 5000;   // max legit rows to keep
-// ────────────────────────────────────────────────────────────
+const int    HIDDEN_SIZE   = 16;
+const double TRAIN_RATIO   = 0.80;
+const int    EPOCHS        = 500;
+const int    LOG_INTERVAL  = 100;
+const double THRESHOLD     = 0.5;
+const int    LEGIT_SAMPLE  = 5000;
 
-// Walk up from bin/Debug/net10.0/ to the project root
 string csvPath = Path.GetFullPath(
     Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "creditcard.csv"));
 
@@ -36,7 +22,6 @@ Console.WriteLine($"Network : 30 -> {HIDDEN_SIZE} -> 1");
 Console.WriteLine($"Epochs  : {EPOCHS}  |  Train/Test: {TRAIN_RATIO*100:0}%/{(1-TRAIN_RATIO)*100:0}%");
 Console.WriteLine();
 
-// ── 1. Load & Parse CSV ─────────────────────────────────────
 Console.WriteLine("[1] Loading dataset...");
 
 var allInputs  = new List<double[]>();
@@ -50,14 +35,11 @@ using (var sr = new StreamReader(csvPath))
         if (string.IsNullOrWhiteSpace(line)) continue;
 
         string[] parts = line.Split(',');
-        // columns: Time, V1..V28, Amount, Class  (31 columns total)
-        // We use V1..V28 + Amount = 29 features  (skip Time, index 0)
-        // Actually the activity says 30 inputs — include Time too.
         double[] features = new double[30];
         for (int i = 0; i < 30; i++)
             features[i] = double.Parse(parts[i], CultureInfo.InvariantCulture);
 
-        // Class is last column — strip surrounding quotes if present
+        // Class is last column strip surrounding quotes if present
         string classStr = parts[30].Trim('"');
         double label    = double.Parse(classStr, CultureInfo.InvariantCulture);
 
@@ -68,10 +50,6 @@ using (var sr = new StreamReader(csvPath))
 
 int totalSamples = allInputs.Count;
 Console.WriteLine($"    Loaded {totalSamples:N0} samples.");
-
-// ── 1b. Stratified Sampling ──────────────────────────────────
-// Keep ALL fraud rows + up to LEGIT_SAMPLE legit rows.
-// This preserves the fraud signal while making training fast.
 Console.WriteLine($"[1b] Stratified sampling (all fraud + {LEGIT_SAMPLE:N0} legit)...");
 
 var sampledInputs = new List<double[]>();
@@ -111,7 +89,6 @@ allInputs = sampledInputs;
 allLabels = sampledLabels;
 totalSamples = allInputs.Count;
 
-// ── 2. Compute Min-Max per feature (on full set) ─────────────
 Console.WriteLine("[2] Normalising features (Min-Max → [0,1])...");
 
 double[] featureMin = new double[30];
@@ -143,11 +120,8 @@ foreach (double[] row in allInputs)
 }
 
 Console.WriteLine("    Normalisation complete.");
-
-// ── 3. Shuffle & Train/Test Split ───────────────────────────
 Console.WriteLine("[3] Shuffling and splitting dataset...");
 
-// Shuffle with a fixed seed for reproducibility
 var rng     = new Random(42);
 var indices = new List<int>(totalSamples);
 for (int i = 0; i < totalSamples; i++) indices.Add(i);
@@ -180,19 +154,15 @@ int trainFraud = 0, trainLegit = 0;
 foreach (double l in trainLabels) { if (l == 1) trainFraud++; else trainLegit++; }
 Console.WriteLine($"    Train: {trainCount:N0}  (legit={trainLegit:N0}, fraud={trainFraud:N0})");
 Console.WriteLine($"    Test : {testCount:N0}");
-
-// ── 4. Build Network ─────────────────────────────────────────
 Console.WriteLine("[4] Building network  30 → {0} → 1 ...", HIDDEN_SIZE);
-// NeuralNet(input, hidden, output)
+
 var net = new NeuralNet(30, HIDDEN_SIZE, 1);
 
-// ── 5. Training Loop ─────────────────────────────────────────
 Console.WriteLine("[5] Training...");
 Console.WriteLine();
 Console.WriteLine($"{"Epoch",-10} {"Avg MSE Loss",-18} {"Train Acc",-14} {"Notes"}");
 Console.WriteLine(new string('-', 60));
 
-// Optional: track loss per epoch for CSV export
 var lossLog = new List<(int epoch, double loss, double acc)>();
 
 for (int epoch = 1; epoch <= EPOCHS; epoch++)
@@ -210,22 +180,14 @@ for (int epoch = 1; epoch <= EPOCHS; epoch++)
 
     for (int s = 0; s < trainCount; s++)
     {
-        // Feed inputs
         for (int f = 0; f < 30; f++)
             net.setInputs(f, trainInputs[s][f]);
 
-        // Set desired output
         net.setDesiredOutput(0, trainLabels[s]);
-
-        // Forward + Backprop
         net.learn();
-
-        // MSE loss for this sample
         double output = net.getOuputData(0);
         double err    = trainLabels[s] - output;
         totalLoss    += err * err;
-
-        // Training accuracy
         double predicted = (output >= THRESHOLD) ? 1.0 : 0.0;
         if (predicted == trainLabels[s]) correct++;
     }
@@ -244,7 +206,6 @@ for (int epoch = 1; epoch <= EPOCHS; epoch++)
 
 Console.WriteLine();
 
-// ── 6. Save Training Log ─────────────────────────────────────
 // Save log to project root (next to Program.cs), not the build output folder
 string projectRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", ".."));
 string logPath = Path.Combine(projectRoot, "training_log.csv");
@@ -255,8 +216,6 @@ using (var sw = new StreamWriter(logPath))
         sw.WriteLine($"{ep},{loss:F8},{acc:F4}");
 }
 Console.WriteLine($"[6] Training log saved → {logPath}");
-
-// ── 7. Evaluation on Test Set ────────────────────────────────
 Console.WriteLine("[7] Evaluating on test set...");
 
 int TP = 0, TN = 0, FP = 0, FN = 0;
@@ -302,7 +261,6 @@ Console.WriteLine($"  F1 Score  : {f1:F4}%");
 Console.WriteLine("===========================================");
 Console.WriteLine();
 
-// ── 8. Hyperparameter Summary ────────────────────────────────
 Console.WriteLine("===========================================");
 Console.WriteLine("       HYPERPARAMETER CONFIGURATION");
 Console.WriteLine("===========================================");

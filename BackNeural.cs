@@ -5,12 +5,12 @@ namespace Backprop
 {
 	public class NeuralNet
 	{
-		private INeuron [] ineuron;//approximatelty 3072
-		private HNeuron [] hneuron;// approx 64
-		private ONeuron [] oneuron;//approx 10
-		private const double LRPOUT =0.2;//learning rate for the the ouptput layer
-		private const double LRPIN = 0.15;// learning rate for the input layer
-		private double [] errorComponent; // approx 10;
+		private INeuron [] ineuron;
+		private HNeuron [] hneuron;
+		private ONeuron [] oneuron;
+		private const double LRPOUT =0.2;
+		private const double LRPIN = 0.15;
+		private double [] errorComponent;
 		private double [] errorDerivative;
 		private double [] desiredout;
 
@@ -24,6 +24,7 @@ namespace Backprop
 			errorDerivative=new double[10];
 			createNeurons(ineuron.Length,hneuron.Length,oneuron.Length);
 		}
+
 		public NeuralNet(int input,int hidden,int output)
 		{
 			ineuron=new INeuron[input];
@@ -34,6 +35,7 @@ namespace Backprop
 			desiredout=new double[output];
 			createNeurons(ineuron.Length,hneuron.Length,oneuron.Length);
 		}
+
 		public void createNeurons(int i,int h,int o)
 		{
 			for (int x=0;x<i;x++)
@@ -48,8 +50,8 @@ namespace Backprop
 			{
 				oneuron[x]=new ONeuron(x);
 			}
-
 		}
+
 		public double getOuputData(int pos)
 		{
 			return oneuron[pos].getOActivation();
@@ -70,6 +72,7 @@ namespace Backprop
 			}
 			return (double)(1.0/(1.0 + System.Math.Exp(-dat)));
 		}
+
 		public void calculateHA()
 		{
 			// calculate the diferent activations on the 2 neurons
@@ -84,6 +87,7 @@ namespace Backprop
 				//hneuron[x].setHactivation(sigmoid(summation));
 			}
 		}
+
 		public void calculateOA()
 		{
 			// calculate the differnent activations for the output layers
@@ -98,6 +102,7 @@ namespace Backprop
 				//oneuron[x].setOActivation(sigmoid(summation));
 			}
 		}
+
 		public void calculateEC()
 		{
 			//calculate the different EC on the the output layer
@@ -106,6 +111,7 @@ namespace Backprop
 				errorComponent[x]=(desiredout[x])-(oneuron[x].getOActivation());
 			}
 		}
+
 		public void calculateDER()
 		{
 			//calclulate the different derivatives on the output layer
@@ -114,6 +120,7 @@ namespace Backprop
 				errorDerivative[x]=oneuron[x].getOActivation()*(1-(oneuron[x].getOActivation()))*errorComponent[x];
 			}
 		}
+
 		public void learn()
 		{// trainning session
 			this.run();
@@ -135,14 +142,15 @@ namespace Backprop
 				oneuron[x].changeBias(LRPOUT,errorDerivative);
 			for (int x=0;x<hneuron.Length;x++)//change in 2 neuron bias
 				hneuron[x].changeBias(LRPIN);
-
 		}
+
 		public void run()
 		{
 			this.calculateHA();
 			this.calculateOA();
 			//application phase
 		}
+
 		public bool countgood()
 		{
 			// session terminator
@@ -154,6 +162,7 @@ namespace Backprop
 			}
 			return result;
 		}
+
 		public void saveWeights(String path)
 		{
 
@@ -209,7 +218,6 @@ namespace Backprop
 					oneuron[x].setBias(Convert.ToDouble(sr.ReadLine()));
 				}
 			}//end of streamreader
-		
 		}
 	}//end of neural net
 }
