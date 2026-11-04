@@ -16,7 +16,7 @@ A real-world **Binary Classification** project using a hand-built 3-layer Multi-
 | Label | `Class`: `0` = Legitimate, `1` = Fraudulent |
 | Class imbalance | ~0.17% fraud (492 out of 284,807) |
 
-The dataset contains real credit card transactions made by European cardholders in September 2013. Features V1–V28 are the result of a PCA transformation to protect user confidentiality. `Time` and `Amount` are the only non-transformed features.
+This is Kaggle Credit Card Fraud Detection dataset, which contains 284,807 real credit card transactions made by European cardholders in September 2013. It has 30 features — Time, V1–V28 (PCA-anonymised for privacy), and Amount — along with a Class label where 0 means legitimate and 1 means fraudulent. The dataset is highly imbalanced with only 492 fraud cases out of 284,807 total (0.17%). We applied stratified sampling to balance training, and Min-Max normalization to scale all features to [0, 1] before training.
 
 ---
 
