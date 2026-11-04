@@ -30,7 +30,6 @@ Input Layer   →   Hidden Layer   →   Output Layer
 
 - **Activation:** Sigmoid on all layers
 - **Loss:** Mean Squared Error (MSE)
-- **Backpropagation:** Implemented from scratch in `BackNeural.cs`
 
 ---
 
