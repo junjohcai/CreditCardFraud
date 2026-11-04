@@ -7,6 +7,10 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using Backprop;
+using System.Text;
+
+// Set console to UTF-8 so arrows and special characters display correctly
+Console.OutputEncoding = System.Text.Encoding.UTF8;
 
 // Hyperparameters - change these to experiment with different configurations
 const int    HIDDEN_SIZE   = 16;     // number of neurons in the hidden layer
@@ -27,6 +31,7 @@ Console.WriteLine("===========================================");
 Console.WriteLine($"Dataset : {csvPath}");
 Console.WriteLine($"Network : 30 -> {HIDDEN_SIZE} -> 1");
 Console.WriteLine($"Epochs  : {EPOCHS}  |  Train/Test: {TRAIN_RATIO*100:0}%/{(1-TRAIN_RATIO)*100:0}%");
+Console.WriteLine($"Labels  : 0 = Legitimate  |  1 = Fraud");
 Console.WriteLine();
 
 // Step 1 - Load the dataset from CSV
@@ -108,7 +113,7 @@ totalSamples = allInputs.Count;
 // Step 2 - Normalize features using Min-Max scaling to range [0, 1]
 // This is important because the neural network performs better when all inputs
 // are on the same scale instead of wildly different ranges.
-Console.WriteLine("[2] Normalising features (Min-Max → [0,1])...");
+Console.WriteLine("[2] Normalising features (Min-Max -> [0,1])...");
 
 double[] featureMin = new double[30];
 double[] featureMax = new double[30];
@@ -180,7 +185,7 @@ Console.WriteLine($"    Test : {testCount:N0}");
 // Step 4 - Create the neural network
 // Architecture: 30 input neurons -> 16 hidden neurons -> 1 output neuron
 // The output is a value between 0 and 1; above 0.5 means we predict fraud.
-Console.WriteLine("[4] Building network  30 → {0} → 1 ...", HIDDEN_SIZE);
+Console.WriteLine("[4] Building network  30 -> {0} -> 1 ...", HIDDEN_SIZE);
 var net = new NeuralNet(30, HIDDEN_SIZE, 1);
 
 // Step 5 - Train the network
@@ -236,7 +241,7 @@ for (int epoch = 1; epoch <= EPOCHS; epoch++)
     if (epoch % LOG_INTERVAL == 0 || epoch == 1)
     {
         string note = epoch == 1 ? "<-- start" : (epoch == EPOCHS ? "<-- final" : "");
-        Console.WriteLine($"{epoch,-10} {avgLoss,-18:F6} {trainAcc,-14:F2}% {note}");
+        Console.WriteLine($"{epoch,-10} {avgLoss,-18:F6} {trainAcc.ToString("F2") + "%",-14} {note}");
     }
 }
 
@@ -252,7 +257,7 @@ using (var sw = new StreamWriter(logPath))
     foreach (var (ep, loss, acc) in lossLog)
         sw.WriteLine($"{ep},{loss:F8},{acc:F4}");
 }
-Console.WriteLine($"[6] Training log saved → {logPath}");
+Console.WriteLine($"[6] Training log saved -> {logPath}");
 
 // Step 7 - Evaluate on the test set
 // The test set was never seen during training, so this gives us a fair picture
@@ -316,3 +321,4 @@ Console.WriteLine($"  Threshold      : {THRESHOLD}");
 Console.WriteLine("===========================================");
 Console.WriteLine();
 Console.WriteLine("Done. Check training_log.csv for the loss curve.");
+
