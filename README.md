@@ -17,7 +17,7 @@ A real-world **Binary Classification** project using a hand-built 3-layer Multi-
 | Class imbalance | ~0.17% fraud (492 out of 284,807) |
 
 We used the Kaggle Credit Card Fraud Detection dataset, which contains 284,807 real credit card transactions made by European cardholders in September 2013. The dataset has 30 input features including Time, V1 through V28 (which are PCA-transformed to protect user privacy), and Amount. The last column is the Class label, where 0 means the transaction is legitimate and 1 means it is fraudulent. The dataset is heavily imbalanced, with only 492 fraud cases out of 284,807 total transactions, which is about 0.17%. To handle this, we used stratified sampling to keep all fraud cases while limiting the number of legitimate transactions, and applied Min-Max normalization to scale all features to a range of 0 to 1 before training the network.
----
+
 
 ## Network Architecture
 
